@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Cute To-Do List</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8">
+  <title>💖 Cute To-Do List</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<div class="container">
-    <h1>To-Do List by Diones and Balistoy💖</h1>
+  <div class="container">
+    <h1> To-Do 💖</h1>
     <form action="/add" method="post">
-        <input type="text" name="task" placeholder="Add a task..." required>
-        <button type="submit">Add</button>
+      <input type="text" name="task" placeholder="Add a new task" required>
+      <button type="submit">Add</button>
     </form>
+
     <ul>
-        {% for i, task in enumerate(tasks) %}
-            <li>{{ task }} <a href="/delete/{{ i }}">❌</a></li>
-        {% endfor %}
+      {% for i, task in enumerate(tasks) %}
+        <li>{{ task }} <a href="/delete/{{ i }}">❌</a></li>
+      {% endfor %}
     </ul>
-</div>
+  </div>
 </body>
 </html>
