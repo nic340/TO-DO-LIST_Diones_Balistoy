@@ -6,13 +6,14 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 templates = Jinja2Templates(directory="templates")
 
 tasks = []
 
 @app.get("/")
 def read_tasks(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "tasks": tasks})
+    return templates.TemplateResponse("index.html", context={"request": request, "tasks": tasks})
 
 @app.post("/add")
 def add_task(request: Request, task: str = Form(...)):
