@@ -13,7 +13,7 @@ tasks = []
 
 @app.get("/")
 def read_tasks(request: Request):
-    return templates.TemplateResponse("index.html", context={"request": request, "tasks": tasks})
+    return templates.TemplateResponse("index.html", {"request": request, "tasks": tasks})
 
 @app.post("/add")
 def add_task(request: Request, task: str = Form(...)):
