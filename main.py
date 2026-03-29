@@ -1,26 +1,48 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-
 tasks = []
 
-@app.get("/")
-async def read_tasks(request: Request):
-    return templates.TemplateResponse(name="index.html", context={"request": request, "tasks": tasks})
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    html = """
+    <html>
+    <head>
+        <title>To-Do List</title>
+    </head>
+    <body>
+        <h1>💖</h1>
+
+        <form action="/add" method="post">
+            <input type="text" name="task" placeholder="Enter task" required>
+            <button type="submit">Add</button>
+        </form>
+
+        <ul>
+    """
+
+    for i, task in enumerate(tasks):
+        html += f"<li>{task} <a href='/delete/{i}'>❌</a></li>"
+
+    html += """
+        </ul>
+    </body>
+    </html>
+    """
+
+    return html
+
 
 @app.post("/add")
-async def add_task(request: Request, task: str = Form(...)):
+async def add_task(task: str = Form(...)):
     tasks.append(task)
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse("/", status_code=303)
+
 
 @app.get("/delete/{task_id}")
 async def delete_task(task_id: int):
     if 0 <= task_id < len(tasks):
         tasks.pop(task_id)
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse("/", status_code=303)
