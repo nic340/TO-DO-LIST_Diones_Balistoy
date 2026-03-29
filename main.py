@@ -6,6 +6,7 @@ from datetime import datetime
 app = FastAPI()
 FILE = "tasks.json"
 
+# Load tasks from file
 if os.path.exists(FILE):
     with open(FILE, "r") as f:
         tasks = json.load(f)
@@ -15,7 +16,6 @@ else:
 def save():
     with open(FILE, "w") as f:
         json.dump(tasks, f)
-
 
 @app.get("/", response_class=HTMLResponse)
 async def home():
@@ -36,45 +36,36 @@ async def home():
                 align-items: center;
                 height: 100vh;
             }}
-
             .layout {{
                 display: grid;
                 grid-template-columns: 200px 1fr;
                 width: 900px;
                 gap: 15px;
             }}
-
             .sidebar {{
                 background: white;
                 border-radius: 20px;
                 padding: 20px;
                 box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             }}
-
             .main {{
                 display: flex;
                 flex-direction: column;
                 gap: 15px;
             }}
-
             .card {{
                 background: white;
                 border-radius: 20px;
                 padding: 20px;
                 box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             }}
-
-            h2 {{
-                margin-top: 0;
-            }}
-
+            h2 {{ margin-top: 0; }}
             input {{
                 padding: 10px;
                 border-radius: 10px;
                 border: 1px solid #ddd;
                 width: 70%;
             }}
-
             button {{
                 padding: 10px;
                 border: none;
@@ -83,16 +74,8 @@ async def home():
                 color: white;
                 cursor: pointer;
             }}
-
-            button:hover {{
-                background: #ff6f91;
-            }}
-
-            ul {{
-                list-style: none;
-                padding: 0;
-            }}
-
+            button:hover {{ background: #ff6f91; }}
+            ul {{ list-style: none; padding: 0; }}
             li {{
                 background: #f9fafb;
                 padding: 10px;
@@ -101,35 +84,14 @@ async def home():
                 display: flex;
                 justify-content: space-between;
             }}
-
-            .done {{
-                text-decoration: line-through;
-                color: gray;
-            }}
-
-            .time {{
-                font-size: 10px;
-                color: gray;
-            }}
-
-            .actions a {{
-                margin-left: 5px;
-                text-decoration: none;
-            }}
-
-            .stat {{
-                font-size: 18px;
-                margin: 10px 0;
-            }}
-
+            .done {{ text-decoration: line-through; color: gray; }}
+            .time {{ font-size: 10px; color: gray; }}
+            .actions a {{ margin-left: 5px; text-decoration: none; }}
+            .stat {{ font-size: 18px; margin: 10px 0; }}
         </style>
     </head>
-
     <body>
-
         <div class="layout">
-
-            <!-- SIDEBAR -->
             <div class="sidebar">
                 <h3>🌸 Planner</h3>
                 <p style="font-size:12px;color:gray;">
@@ -139,26 +101,18 @@ async def home():
                 • Keep it cute 💖
                 </p>
             </div>
-
-            <!-- MAIN -->
             <div class="main">
-
-                <!-- STATS -->
                 <div class="card">
                     <h2>📊 Overview</h2>
                     <div class="stat">Total Tasks: {total}</div>
                     <div class="stat">Completed: {done}</div>
                 </div>
-
-                <!-- TO DO -->
                 <div class="card">
                     <h2>📝 To-Do List</h2>
-
                     <form action="/add" method="post">
                         <input name="task" placeholder="Add task..." required>
                         <button>Add</button>
                     </form>
-
                     <ul>
     """
 
@@ -167,7 +121,6 @@ async def home():
     else:
         for i, t in enumerate(tasks):
             style = "done" if t["done"] else ""
-
             html += f"""
             <li>
                 <div class="{style}">
@@ -183,24 +136,18 @@ async def home():
 
     html += """
                     </ul>
-
                     <form action="/clear" method="post">
                         <button style="background:#ff4d6d;">Clear All</button>
                     </form>
-
                 </div>
-
             </div>
         </div>
-
     </body>
     </html>
     """
-
     return html
 
-
-
+# ----------------- API Endpoints -----------------
 @app.post("/add")
 async def add(task: str = Form(...)):
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
