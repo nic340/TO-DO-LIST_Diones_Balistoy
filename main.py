@@ -25,23 +25,23 @@ async def home():
     html = f"""
     <html>
     <head>
-        <title>TaskFlow</title>
+        <title>🌷 Task Studio</title>
         <style>
             body {{
                 font-family: 'Segoe UI', sans-serif;
-                background: #f5f7fb;
+                background: linear-gradient(135deg, #ffe4ec, #e0f7fa);
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 height: 100vh;
             }}
 
-            .app {{
-                width: 420px;
+            .container {{
+                width: 450px;
                 background: white;
-                border-radius: 16px;
+                border-radius: 20px;
                 padding: 25px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             }}
 
             h1 {{
@@ -49,30 +49,43 @@ async def home():
                 font-size: 24px;
             }}
 
-            .stats {{
-                font-size: 13px;
-                color: gray;
+            .top {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
                 margin-bottom: 15px;
             }}
 
+            .badge {{
+                background: #ffe0f0;
+                padding: 5px 10px;
+                border-radius: 999px;
+                font-size: 12px;
+            }}
+
+            .input-group {{
+                display: flex;
+                gap: 10px;
+            }}
+
             input {{
-                width: 70%;
+                flex: 1;
                 padding: 10px;
-                border-radius: 8px;
+                border-radius: 10px;
                 border: 1px solid #ddd;
             }}
 
             button {{
-                padding: 10px 12px;
+                padding: 10px;
                 border: none;
-                border-radius: 8px;
-                background: #4f46e5;
+                border-radius: 10px;
+                background: #ff8fab;
                 color: white;
                 cursor: pointer;
             }}
 
             button:hover {{
-                background: #4338ca;
+                background: #ff6f91;
             }}
 
             ul {{
@@ -84,14 +97,19 @@ async def home():
             li {{
                 background: #f9fafb;
                 padding: 12px;
-                border-radius: 10px;
+                border-radius: 12px;
                 margin-bottom: 10px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                transition: 0.2s;
             }}
 
-            .left {{
+            li:hover {{
+                transform: scale(1.02);
+            }}
+
+            .text {{
                 text-align: left;
             }}
 
@@ -108,53 +126,64 @@ async def home():
             .actions a {{
                 margin-left: 8px;
                 text-decoration: none;
+                font-size: 16px;
+            }}
+
+            .footer {{
+                margin-top: 10px;
+                text-align: right;
             }}
 
             .clear {{
-                margin-top: 10px;
-                background: #ef4444;
+                background: #ff4d6d;
             }}
         </style>
     </head>
 
     <body>
-        <div class="app">
-            <h1>TaskFlow ✔️</h1>
-            <div class="stats">Total: {total} | Completed: {done}</div>
+        <div class="container">
 
-            <form action="/add" method="post">
-                <input name="task" placeholder="What needs to be done?" required>
-                <button>Add</button>
-            </form>
+            <div class="top">
+                <h1>🌷 Task Studio</h1>
+                <div class="badge">{done}/{total} done</div>
+            </div>
 
-            <form action="/clear" method="post">
-                <button class="clear">Clear All</button>
+            <form action="/add" method="post" class="input-group">
+                <input name="task" placeholder="Write something productive..." required>
+                <button>＋</button>
             </form>
 
             <ul>
     """
 
     if len(tasks) == 0:
-        html += "<p style='color:gray;'>No tasks yet.</p>"
+        html += "<p style='color:gray;'>No tasks yet ✨</p>"
     else:
         for i, t in enumerate(tasks):
             style = "done" if t["done"] else ""
 
             html += f"""
             <li>
-                <div class="left {style}">
+                <div class="text {style}">
                     {t['text']}<br>
                     <span class="time">{t['time']}</span>
                 </div>
                 <div class="actions">
                     <a href="/toggle/{i}">✔️</a>
-                    <a href="/delete/{i}">❌</a>
+                    <a href="/delete/{i}">🗑️</a>
                 </div>
             </li>
             """
 
     html += """
             </ul>
+
+            <div class="footer">
+                <form action="/clear" method="post">
+                    <button class="clear">Clear All</button>
+                </form>
+            </div>
+
         </div>
     </body>
     </html>
@@ -168,7 +197,7 @@ async def add(task: str = Form(...)):
     tasks.append({
         "text": task,
         "done": False,
-        "time": datetime.now().strftime("%b %d, %H:%M")
+        "time": datetime.now().strftime("%b %d • %H:%M")
     })
     save()
     return RedirectResponse("/", status_code=303)
