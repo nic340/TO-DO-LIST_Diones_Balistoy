@@ -25,54 +25,54 @@ async def home():
     html = f"""
     <html>
     <head>
-        <title>🌷 Task Studio</title>
+        <title>🌸 Task Dashboard</title>
         <style>
             body {{
                 font-family: 'Segoe UI', sans-serif;
                 background: linear-gradient(135deg, #ffe4ec, #e0f7fa);
+                margin: 0;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 height: 100vh;
             }}
 
-            .container {{
-                width: 450px;
+            .layout {{
+                display: grid;
+                grid-template-columns: 200px 1fr;
+                width: 900px;
+                gap: 15px;
+            }}
+
+            .sidebar {{
                 background: white;
                 border-radius: 20px;
-                padding: 25px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+                padding: 20px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             }}
 
-            h1 {{
-                margin: 0;
-                font-size: 24px;
-            }}
-
-            .top {{
+            .main {{
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
+                flex-direction: column;
+                gap: 15px;
             }}
 
-            .badge {{
-                background: #ffe0f0;
-                padding: 5px 10px;
-                border-radius: 999px;
-                font-size: 12px;
+            .card {{
+                background: white;
+                border-radius: 20px;
+                padding: 20px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             }}
 
-            .input-group {{
-                display: flex;
-                gap: 10px;
+            h2 {{
+                margin-top: 0;
             }}
 
             input {{
-                flex: 1;
                 padding: 10px;
                 border-radius: 10px;
                 border: 1px solid #ddd;
+                width: 70%;
             }}
 
             button {{
@@ -91,26 +91,15 @@ async def home():
             ul {{
                 list-style: none;
                 padding: 0;
-                margin-top: 20px;
             }}
 
             li {{
                 background: #f9fafb;
-                padding: 12px;
+                padding: 10px;
                 border-radius: 12px;
-                margin-bottom: 10px;
+                margin-bottom: 8px;
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
-                transition: 0.2s;
-            }}
-
-            li:hover {{
-                transform: scale(1.02);
-            }}
-
-            .text {{
-                text-align: left;
             }}
 
             .done {{
@@ -119,52 +108,69 @@ async def home():
             }}
 
             .time {{
-                font-size: 11px;
+                font-size: 10px;
                 color: gray;
             }}
 
             .actions a {{
-                margin-left: 8px;
+                margin-left: 5px;
                 text-decoration: none;
-                font-size: 16px;
             }}
 
-            .footer {{
-                margin-top: 10px;
-                text-align: right;
+            .stat {{
+                font-size: 18px;
+                margin: 10px 0;
             }}
 
-            .clear {{
-                background: #ff4d6d;
-            }}
         </style>
     </head>
 
     <body>
-        <div class="container">
 
-            <div class="top">
-                <h1>🌷 Task Studio</h1>
-                <div class="badge">{done}/{total} done</div>
+        <div class="layout">
+
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <h3>🌸 Planner</h3>
+                <p style="font-size:12px;color:gray;">
+                Stay productive ✨<br><br>
+                • Plan your day<br>
+                • Track progress<br>
+                • Keep it cute 💖
+                </p>
             </div>
 
-            <form action="/add" method="post" class="input-group">
-                <input name="task" placeholder="Write something productive..." required>
-                <button>＋</button>
-            </form>
+            <!-- MAIN -->
+            <div class="main">
 
-            <ul>
+                <!-- STATS -->
+                <div class="card">
+                    <h2>📊 Overview</h2>
+                    <div class="stat">Total Tasks: {total}</div>
+                    <div class="stat">Completed: {done}</div>
+                </div>
+
+                <!-- TO DO -->
+                <div class="card">
+                    <h2>📝 To-Do List</h2>
+
+                    <form action="/add" method="post">
+                        <input name="task" placeholder="Add task..." required>
+                        <button>Add</button>
+                    </form>
+
+                    <ul>
     """
 
     if len(tasks) == 0:
-        html += "<p style='color:gray;'>No tasks yet ✨</p>"
+        html += "<p>No tasks yet ✨</p>"
     else:
         for i, t in enumerate(tasks):
             style = "done" if t["done"] else ""
 
             html += f"""
             <li>
-                <div class="text {style}">
+                <div class="{style}">
                     {t['text']}<br>
                     <span class="time">{t['time']}</span>
                 </div>
@@ -176,15 +182,17 @@ async def home():
             """
 
     html += """
-            </ul>
+                    </ul>
 
-            <div class="footer">
-                <form action="/clear" method="post">
-                    <button class="clear">Clear All</button>
-                </form>
+                    <form action="/clear" method="post">
+                        <button style="background:#ff4d6d;">Clear All</button>
+                    </form>
+
+                </div>
+
             </div>
-
         </div>
+
     </body>
     </html>
     """
