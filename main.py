@@ -6,122 +6,150 @@ from datetime import datetime
 app = FastAPI()
 FILE = "tasks.json"
 
-# Load tasks
 if os.path.exists(FILE):
     with open(FILE, "r") as f:
         tasks = json.load(f)
 else:
     tasks = []
 
-def save_tasks():
+def save():
     with open(FILE, "w") as f:
         json.dump(tasks, f)
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home(search: str = ""):
-    filtered = [t for t in tasks if search.lower() in t["text"].lower()]
-
+async def home():
     total = len(tasks)
     done = sum(1 for t in tasks if t["done"])
 
     html = f"""
     <html>
     <head>
-        <title>💖 Smart To-Do</title>
+        <title>TaskFlow</title>
         <style>
             body {{
-                font-family: Arial;
-                background: linear-gradient(to right, #ffe6f0, #fff);
-                text-align: center;
-                margin-top: 40px;
+                font-family: 'Segoe UI', sans-serif;
+                background: #f5f7fb;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
             }}
-            .box {{
+
+            .app {{
+                width: 420px;
                 background: white;
+                border-radius: 16px;
                 padding: 25px;
-                border-radius: 20px;
-                width: 350px;
-                margin: auto;
-                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             }}
+
+            h1 {{
+                margin: 0;
+                font-size: 24px;
+            }}
+
+            .stats {{
+                font-size: 13px;
+                color: gray;
+                margin-bottom: 15px;
+            }}
+
             input {{
-                padding: 8px;
-                border-radius: 10px;
-                border: 1px solid #ccc;
-                margin: 5px;
+                width: 70%;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
             }}
+
             button {{
-                padding: 8px 12px;
+                padding: 10px 12px;
                 border: none;
-                border-radius: 10px;
-                background: #ff69b4;
+                border-radius: 8px;
+                background: #4f46e5;
                 color: white;
                 cursor: pointer;
             }}
+
             button:hover {{
-                background: #ff1493;
+                background: #4338ca;
             }}
+
             ul {{
                 list-style: none;
                 padding: 0;
+                margin-top: 20px;
             }}
+
             li {{
-                margin: 10px 0;
-                font-size: 14px;
+                background: #f9fafb;
+                padding: 12px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }}
+
+            .left {{
+                text-align: left;
+            }}
+
             .done {{
                 text-decoration: line-through;
                 color: gray;
             }}
-            a {{
-                margin-left: 5px;
+
+            .time {{
+                font-size: 11px;
+                color: gray;
+            }}
+
+            .actions a {{
+                margin-left: 8px;
                 text-decoration: none;
             }}
-            .stats {{
-                font-size: 12px;
-                color: gray;
+
+            .clear {{
+                margin-top: 10px;
+                background: #ef4444;
             }}
         </style>
     </head>
+
     <body>
-        <div class="box">
-            <h2>💖 Smart To-Do List</h2>
-
-            <p class="stats">Total: {total} | Done: {done}</p>
-
-            <form method="get">
-                <input name="search" placeholder="Search..." value="{search}">
-                <button>Search</button>
-            </form>
+        <div class="app">
+            <h1>TaskFlow ✔️</h1>
+            <div class="stats">Total: {total} | Completed: {done}</div>
 
             <form action="/add" method="post">
-                <input name="task" placeholder="New task" required>
+                <input name="task" placeholder="What needs to be done?" required>
                 <button>Add</button>
             </form>
 
             <form action="/clear" method="post">
-                <button style="background:red;">Clear All 🗑️</button>
+                <button class="clear">Clear All</button>
             </form>
 
             <ul>
     """
 
-    if len(filtered) == 0:
-        html += "<p>No tasks found 😢</p>"
+    if len(tasks) == 0:
+        html += "<p style='color:gray;'>No tasks yet.</p>"
     else:
         for i, t in enumerate(tasks):
-            if search.lower() not in t["text"].lower():
-                continue
-
-            style = "class='done'" if t["done"] else ""
+            style = "done" if t["done"] else ""
 
             html += f"""
-            <li {style}>
-                {t['text']} <br>
-                <small>{t['time']}</small><br>
-                <a href='/toggle/{i}'>✔️</a>
-                <a href='/delete/{i}'>❌</a>
-                <a href='/edit/{i}'>✏️</a>
+            <li>
+                <div class="left {style}">
+                    {t['text']}<br>
+                    <span class="time">{t['time']}</span>
+                </div>
+                <div class="actions">
+                    <a href="/toggle/{i}">✔️</a>
+                    <a href="/delete/{i}">❌</a>
+                </div>
             </li>
             """
 
@@ -131,56 +159,39 @@ async def home(search: str = ""):
     </body>
     </html>
     """
+
     return html
 
 
 @app.post("/add")
-async def add_task(task: str = Form(...)):
+async def add(task: str = Form(...)):
     tasks.append({
         "text": task,
         "done": False,
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M")
+        "time": datetime.now().strftime("%b %d, %H:%M")
     })
-    save_tasks()
+    save()
     return RedirectResponse("/", status_code=303)
 
 
-@app.get("/delete/{task_id}")
-async def delete_task(task_id: int):
-    if 0 <= task_id < len(tasks):
-        tasks.pop(task_id)
-        save_tasks()
+@app.get("/toggle/{id}")
+async def toggle(id: int):
+    if 0 <= id < len(tasks):
+        tasks[id]["done"] = not tasks[id]["done"]
+        save()
     return RedirectResponse("/", status_code=303)
 
 
-@app.get("/toggle/{task_id}")
-async def toggle_task(task_id: int):
-    if 0 <= task_id < len(tasks):
-        tasks[task_id]["done"] = not tasks[task_id]["done"]
-        save_tasks()
+@app.get("/delete/{id}")
+async def delete(id: int):
+    if 0 <= id < len(tasks):
+        tasks.pop(id)
+        save()
     return RedirectResponse("/", status_code=303)
 
 
 @app.post("/clear")
-async def clear_tasks():
+async def clear():
     tasks.clear()
-    save_tasks()
-    return RedirectResponse("/", status_code=303)
-
-
-@app.get("/edit/{task_id}", response_class=HTMLResponse)
-async def edit_page(task_id: int):
-    task = tasks[task_id]
-    return f"""
-    <form action="/edit/{task_id}" method="post">
-        <input name="new_task" value="{task['text']}">
-        <button>Save</button>
-    </form>
-    """
-
-
-@app.post("/edit/{task_id}")
-async def edit_task(task_id: int, new_task: str = Form(...)):
-    tasks[task_id]["text"] = new_task
-    save_tasks()
+    save()
     return RedirectResponse("/", status_code=303)
