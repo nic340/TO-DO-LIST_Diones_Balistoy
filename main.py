@@ -200,35 +200,23 @@ async def home():
     return html
 
 
+
 @app.post("/add")
 async def add(task: str = Form(...)):
-    tasks.append({
-        "text": task,
-        "done": False,
-        "time": datetime.now().strftime("%b %d • %H:%M")
-    })
-    save()
+    tasks.append({"task": task, "done": False})
     return RedirectResponse("/", status_code=303)
 
-
-@app.get("/toggle/{id}")
-async def toggle(id: int):
-    if 0 <= id < len(tasks):
-        tasks[id]["done"] = not tasks[id]["done"]
-        save()
+@app.get("/toggle/{task_id}")
+async def toggle_task(task_id: int):
+    tasks[task_id]["done"] = not tasks[task_id]["done"]
     return RedirectResponse("/", status_code=303)
 
-
-@app.get("/delete/{id}")
-async def delete(id: int):
-    if 0 <= id < len(tasks):
-        tasks.pop(id)
-        save()
+@app.get("/delete/{task_id}")
+async def delete_task(task_id: int):
+    tasks.pop(task_id)
     return RedirectResponse("/", status_code=303)
-
 
 @app.post("/clear")
-async def clear():
+async def clear_tasks():
     tasks.clear()
-    save()
     return RedirectResponse("/", status_code=303)
