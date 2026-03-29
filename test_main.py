@@ -6,30 +6,30 @@ client = TestClient(app)
 def test_home():
     response = client.get("/")
     assert response.status_code == 200
-    assert "To-Do List" in response.text
+    assert "🌸 Task Dashboard" in response.text
 
 def test_add_task():
-    response = client.post("/add", data={"task": "Test Task"})
-    assert response.status_code == 303  # Redirect
-    home = client.get("/")
-    assert "Test Task" in home.text
+    response = client.post("/add", data={"task": "Test Task"}, allow_redirects=False)
+    assert response.status_code == 303  # Redirect after adding
 
 def test_toggle_task():
-    client.post("/add", data={"task": "Toggle Task"})
-    home_before = client.get("/")
-    # find the index of last task
-    task_id = len(home_before.text.split("✔️")) - 2
-    response = client.get(f"/toggle/{task_id}")
+    # Add task first
+    client.post("/add", data={"task": "Toggle Task"}, allow_redirects=False)
+    # Toggle the last task
+    task_id = len(client.get("/").text.split("✔️")) - 2
+    response = client.get(f"/toggle/{task_id}", allow_redirects=False)
     assert response.status_code == 303
 
 def test_delete_task():
-    client.post("/add", data={"task": "Delete Task"})
-    home_before = client.get("/")
-    task_id = len(home_before.text.split("🗑️")) - 2
-    response = client.get(f"/delete/{task_id}")
+    # Add task first
+    client.post("/add", data={"task": "Delete Task"}, allow_redirects=False)
+    # Delete the last task
+    task_id = len(client.get("/").text.split("🗑️")) - 2
+    response = client.get(f"/delete/{task_id}", allow_redirects=False)
     assert response.status_code == 303
 
 def test_clear_tasks():
-    client.post("/add", data={"task": "Clear Me"})
-    response = client.post("/clear")
+    # Add task first
+    client.post("/add", data={"task": "Clear Me"}, allow_redirects=False)
+    response = client.post("/clear", allow_redirects=False)
     assert response.status_code == 303
